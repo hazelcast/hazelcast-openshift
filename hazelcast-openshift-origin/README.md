@@ -25,4 +25,4 @@ Finally, login to your OpenShift Web Administration UI. You should see your new 
 
 For detailed information please see our blog post at http://blog.hazelcast.com/openshift/.
 
-Hazelcast Openshift : https://hub.docker.com/r/hazelcast/openshift/
+Hazelcast Openshift : https://hub.docker.com/r/hazelcast/hazelcast-openshift-origin/
