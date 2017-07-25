@@ -1,5 +1,18 @@
 # Hazelcast OpenShift
 
+## Supported Versions
+
+Hazelcast OpenShift supports:
+* `OC v1.4.1+`
+* `Kubernetes v1.4.0+`
+
+```
+Please note that this distribution also compatible with Kubernetes. Therefore, you may use
+it for deployment not only OpenShift Origin also for Kubernetes.  
+```
+
+## Usage
+
 First login to OpenShift using the OpenShift CLI with the following commands:
 
 ```
@@ -11,7 +24,7 @@ Then create a new project, e.g., `hazelcast-cluster`, and switch to that newly c
 
 ```
 oc new-project hazelcast-cluster
-oc project hazelcast-cluster 
+oc project hazelcast-cluster
 ```
 
 Now download the project template from GitHub and use CLI to register the template under the newly created project using the following commands:
