@@ -1,5 +1,5 @@
 FROM openjdk:8
-ENV HZ_VERSION 3.8.4
+ENV HZ_VERSION 3.8.6
 ENV HZ_HOME /opt/hazelcast/
 RUN mkdir -p $HZ_HOME
 WORKDIR $HZ_HOME
@@ -52,8 +52,10 @@ RUN chmod a+rw /$HZ_HOME/*
 # User default when running
 USER default
 
+# Expose port
+EXPOSE 5701
+
 # Start hazelcast standalone server.
 CMD ./start.sh
 
-# Expose port
-EXPOSE 5701
+
