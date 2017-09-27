@@ -79,7 +79,7 @@ And [create a route](https://docs.openshift.com/container-platform/3.3/dev_guide
 Please also note that you need to login to local Docker registry beforehand with the following command:
 
 ```
-docker login -a <your-ocp-user> -p <your-token> <route-to-registry>
+docker login -u <your-ocp-user> -p <your-token> <route-to-registry>
 ```
 
 You may get `<your-ocp-user>` from `oc whoami` CLI command on OCP VM after connecting it via `vagrant ssh` or `oc login https://<route-to-ocp>:8443`. Moreover, you can get regarding `<your-token>` from `oc whoami -t` command.
