@@ -1,6 +1,6 @@
 
 This repository includes a default configuration file, a template and the Docker file to deploy 
-a Hazelcast Enterprise based standalone infrastructure as a certified
+a Hazelcast Enterprise based standalone infrastructure as a
 Red Hat Enterprise Linux based image.
 
 - [Introduction](#introduction)
@@ -13,7 +13,7 @@ Red Hat Enterprise Linux based image.
 
 # Introduction
 
-This image simplifies the deployment of a Hazelcast Enterprise based standalone infrastructure, as a certified
+This image simplifies the deployment of a Hazelcast Enterprise based standalone infrastructure, as a
 Red Hat Enterprise Linux based image. It is built on top of RHEL 7.
 
 This package consists of the following parts:
