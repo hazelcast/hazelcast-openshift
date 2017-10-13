@@ -207,8 +207,8 @@ Another important point is the `DOCKER REPO` entry for image. In the following s
 * Click `Add to Project` and then `Import YAML/JSON` to start deploying Hazelcast cluster on OCP.
 
 * Copy and paste the contents of `kubernetes-template.js` onto the editor, or browse and upload it.
-** This template file provides sample YML deployment, you can change freely.
-** Please note that added `readiness` probe, which checks whether the cluster is in a safe state. Safe state means; there are no partitions being migrated and all backups are in sync when this method is called. If it is not suitable for you please remove it. 
+ * This template file provides sample YML deployment, you can change freely.
+ * Please note that added `readiness` probe, which checks whether the cluster is in a safe state. Safe state means; there are no partitions being migrated and all backups are in sync when this method is called. If it is not suitable for you please remove it. 
 
 * This template file contains all the deployment information to setup a Hazelcast cluster inside OpenShift. It configures the necessary `ReplicationController`, health checks and image to use. It also offers a set of properties to be requested when creating a new cluster (such as `clustername`).
 
