@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/rhel7
+FROM centos:7
 MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
 
 ENV HZ_HOME /opt/hazelcast/
@@ -11,22 +11,27 @@ ENV USER_UID=10001
 
 ENV HZ_VERSION 3.8.6
 
+ENV JAVA_VERSION_MAJOR=8 \
+    JAVA_VERSION_MINOR=144 \
+    JAVA_VERSION_BUILD=01 \
+    JAVA_URL_HASH=090f390dda5b47b9b721c7dfaa008135
+
 ARG HZ_KUBE_VERSION=1.0.0
 ARG HZ_MAVEN_DIR=${HZ_VERSION}
 ARG REPOSITORY_URL=https://repository-hazelcast-l337.forge.cloudbees.com
 
-LABEL name="hazelcast/hazelcast-openshift-rhel" \
+LABEL name="hazelcast/hazelcast-openshift-centos" \
       vendor="Hazelcast, Inc." \
       version="7.2" \
       architecture="x86_64" \
       release="${HZ_VERSION}" \
       url="http://www.hazelcast.com" \
-      summary="Hazelcast Openshift Image, certified to RHEL 7" \
+      summary="Hazelcast Openshift Image, based on CENTOS 7" \
       description="Starts a standalone Hazelcast server instance to form a cluster based on kubernetes discovery inside Openshift" \
       io.k8s.description="Starts a standalone Hazelcast server instance to form a cluster based on kubernetes discovery inside Openshift" \
       io.k8s.display-name="Hazelcast" \
       io.openshift.expose-services="5701:tcp" \
-      io.openshift.tags="hazelcast,java8,kubernetes,rhel7"
+      io.openshift.tags="hazelcast,java8,kubernetes,centos7"
 
 RUN mkdir -p $HZ_HOME
 RUN mkdir -p $HZ_CP_MOUNT
@@ -38,19 +43,18 @@ ADD stop.sh $HZ_HOME/stop.sh
 ADD liveness.sh $HZ_HOME/liveness.sh
 ADD readiness.sh $HZ_HOME/readiness.sh
 
-### Atomic Help File
-COPY README.md /tmp/
+RUN yum update -y && \
+yum install -y wget && \
+wget --no-cookies --no-check-certificate \
+  --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2Ftechnetwork%2Fjava%2Fjavase%2Fdownloads%2Fjre8-downloads-2133155.html; oraclelicense=accept-securebackup-cookie" \
+  "http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_URL_HASH}/jre-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm" && \
+yum localinstall -y jre-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
+rm -f jre-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
+rm -rf /var/cache/yum
 
-RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
-### Add necessary Red Hat repos here
-    yum-config-manager --enable rhel-7-server-rpms,rhel-7-server-optional-rpms,rhel-7-server-thirdparty-oracle-java-rpms &> /dev/null && \
-    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
-### Add your package needs to this installation line
-    yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-oracle-devel && \
-### help markdown to man conversion
-    go-md2man -in /tmp/README.md -out /help.1 && \
-    yum -y remove golang-github-cpuguy83-go-md2man && \
-    yum -y clean all
+# Set environment variables.
+# ENV HOME /root
+ENV JAVA_HOME /usr/java/latest
 
 ### add hazelcast enterprise
 ADD ${REPOSITORY_URL}/release/com/hazelcast/hazelcast-enterprise-all/${HZ_VERSION}/hazelcast-enterprise-all-${HZ_VERSION}.jar $HZ_HOME
