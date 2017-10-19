@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/rhel7
+FROM centos:7
 MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
 
 ENV HZ_HOME /opt/hazelcast/
@@ -15,18 +15,18 @@ ARG HZ_KUBE_VERSION=1.0.0
 ARG HZ_MAVEN_DIR=${HZ_VERSION}
 ARG REPOSITORY_URL=https://repository-hazelcast-l337.forge.cloudbees.com
 
-LABEL name="hazelcast/hazelcast-openshift-rhel" \
+LABEL name="hazelcast/hazelcast-openshift-centos" \
       vendor="Hazelcast, Inc." \
-      version="7.2" \
+      version="7" \
       architecture="x86_64" \
       release="${HZ_VERSION}" \
       url="http://www.hazelcast.com" \
-      summary="Hazelcast Openshift Image, certified to RHEL 7" \
+      summary="Hazelcast Openshift Image, based on CENTOS 7" \
       description="Starts a standalone Hazelcast server instance to form a cluster based on kubernetes discovery inside Openshift" \
       io.k8s.description="Starts a standalone Hazelcast server instance to form a cluster based on kubernetes discovery inside Openshift" \
       io.k8s.display-name="Hazelcast" \
       io.openshift.expose-services="5701:tcp" \
-      io.openshift.tags="hazelcast,java8,kubernetes,rhel7"
+      io.openshift.tags="hazelcast,java8,kubernetes,centos7"
 
 RUN mkdir -p $HZ_HOME
 RUN mkdir -p $HZ_CP_MOUNT
@@ -38,19 +38,12 @@ ADD stop.sh $HZ_HOME/stop.sh
 ADD liveness.sh $HZ_HOME/liveness.sh
 ADD readiness.sh $HZ_HOME/readiness.sh
 
-### Atomic Help File
-COPY README.md /tmp/
+RUN yum update -y && \
+yum install -y wget && \
+yum install -y java-1.8.0-openjdk && \
+yum clean all
 
-RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
-### Add necessary Red Hat repos here
-    yum-config-manager --enable rhel-7-server-rpms,rhel-7-server-optional-rpms,rhel-7-server-thirdparty-oracle-java-rpms &> /dev/null && \
-    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
-### Add your package needs to this installation line
-    yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-oracle-devel && \
-### help markdown to man conversion
-    go-md2man -in /tmp/README.md -out /help.1 && \
-    yum -y remove golang-github-cpuguy83-go-md2man && \
-    yum -y clean all
+ENV JAVA_HOME /etc/alternatives/jre
 
 ### add hazelcast enterprise
 ADD ${REPOSITORY_URL}/release/com/hazelcast/hazelcast-enterprise-all/${HZ_VERSION}/hazelcast-enterprise-all-${HZ_VERSION}.jar $HZ_HOME
