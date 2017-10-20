@@ -17,7 +17,7 @@ Centos 7 based image.
 
 This package consists of the following parts:
 
-* Hazelcast Enterprise 3.8.6 and related dependencies
+* Hazelcast Enterprise and related dependencies
 * Centos 7
 * OpenJDK 8
 * Health and liveness scripts
