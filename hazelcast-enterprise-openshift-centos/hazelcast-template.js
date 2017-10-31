@@ -106,7 +106,7 @@
 			"type": "ClusterIP",
 			"clusterIP": "None",
 			"selector": {
-				"name": "hazelcast-node-${DEPLOYMENT_NAME}"
+				"name": "hazelcast-enterprise-node-${DEPLOYMENT_NAME}"
 			},
 			"ports": [{
 				"port": 5701,
