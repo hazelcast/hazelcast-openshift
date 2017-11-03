@@ -5,4 +5,4 @@ Hazelcast can be run inside OpenShift benefiting from its cluster management sof
 This repository contains the following folders:
 
 * [OpenShift-Origin](hazelcast-openshift-origin/): Provides the instructions and required files to deploy Hazelcast IMDG onto OpenShift.
-* [OpenShift-RHEL](hazelcast-openshift-rhel/): Provides the instructions and required files to deploy Hazelcast IMDG Enterprise onto OpenShift Container Platform.
+* [OpenShift-RHEL](hazelcast-enterprise-openshift-rhel/): Provides the instructions and required files to deploy Hazelcast IMDG Enterprise onto OpenShift Container Platform.
