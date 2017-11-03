@@ -17,7 +17,7 @@ First login to OpenShift using the OpenShift CLI with the following commands:
 
 ```
 sudo su
-oc login <your-openshit-login-url>
+oc login <your-openshift-login-url>
 ```
 
 Then create a new project, e.g., `hazelcast-cluster`, and switch to that newly created using the following commands:
