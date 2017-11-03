@@ -2,7 +2,7 @@
 	"apiVersion": "v1",
 	"kind": "Template",
 	"metadata": {
-		"name": "hazelcast-openshift-rhel",
+		"name": "hazelcast-enterprise-openshift-rhel",
 		"annotations": {
 			"description": "Openshift deployment template for Hazelcast based on RHEL 7",
 			"tags": "hazelcast, imdg, datagrid, inmemory, kvstore, nosql, java",
@@ -11,7 +11,7 @@
 	},
 
 	"labels": {
-		"template": "hazelcast-openshift-rhel-template"
+		"template": "hazelcast-enterprise-openshift-rhel-template"
 	},
 
 	"objects": [{
@@ -45,7 +45,7 @@
 					],
 					"containers": [{
 						"image": "${HAZELCAST_IMAGE}",
-						"name": "hazelcast-openshift-rhel",
+						"name": "hazelcast-enterprise-openshift-rhel",
 						"env": [{
 							"name": "HAZELCAST_KUBERNETES_SERVICE_DNS",
 							"value": "${SERVICE_NAME}.${NAMESPACE}.svc.${KUBERNETES_SERVICE_DOMAIN}"
@@ -135,7 +135,7 @@
 	"parameters": [{
 		"name": "HAZELCAST_IMAGE",
 		"description": "Defines the location of Hazelcast Enterprise on RHEL 7 image",
-		"value": "hazelcast/hazelcast-openshift-rhel",
+		"value": "hazelcast/hazelcast-enterprise-openshift-rhel",
 		"required": true
 	}, {
 		"name": "DEPLOYMENT_NAME",

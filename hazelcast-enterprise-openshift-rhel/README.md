@@ -50,7 +50,7 @@ After installation of the CDK, you will need to have an up and running OpenShift
 
 Hazelcast `Dockerfile` can be built only on RHEL 7.2/7.3 hosts with proper subscription.
 
-Run the following Docker command under `hazelcast-openshift-rhel` directory to build the image on RHEL host:
+Run the following Docker command under `hazelcast-enterprise-openshift-rhel` directory to build the image on RHEL host:
 
 ```
 docker build . -t <your-image-name>:<version>
@@ -217,7 +217,7 @@ Another important point is the `DOCKER REPO` entry for image. In the following s
 
 * `NAMESPACE` value is important and should match with your project namespace.
 
-* Change `"image": "hazelcast/hazelcast-openshift-rhel"` to `"image":"<registry-route>/<your-namespace>/<your-image-name>"`
+* Change `"image": "hazelcast/hazelcast-enterprise-openshift-rhel"` to `"image":"<registry-route>/<your-namespace>/<your-image-name>"`
 
 * Enter your Hazelcast Enterprise license key to `ENTERPRISE_LICENSE_KEY` input section.
 
