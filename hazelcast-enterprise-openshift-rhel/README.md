@@ -114,9 +114,9 @@ Before starting to deploy your Hazelcast Enterprise cluster, make sure that you 
 
 This is a **prerequisite** step for the next section if you have custom configurations or JARs.
 
-Moreover, OCP 3.5 installations on cloud providers like AWS may not contain `Persistent Volumes`(PV). In that case, you first must create a PV to deploy Hazelcast cluster with `hazelcast-template.js` .
+Moreover, OCP 3.5 installations on cloud providers like AWS may not contain `Persistent Volumes`(PV). In that case, you first must create a PV to deploy Hazelcast cluster with `hazelcast-template.json` .
 
-In order to share custom configurations or custom domain JARs (for example `EntryProcessor` implementations) between Hazelcast Pods, you need to add a persistent volume in OCP. In `hazelcast-template.js` this directory is named as `/data/hazelcast`, and it should be claimed. Below, you can find how to add a persistent volume in OCP. Please notice that it is just an example of a persistent volume creation with `NFS`; there are many different ways that you can map volumes in Kubernetes and OpenShift Platform. You can find the available volumes via [this link](https://docs.openshift.com/container-platform/3.4/rest_api/kubernetes_v1.html#v1-volume)
+In order to share custom configurations or custom domain JARs (for example `EntryProcessor` implementations) between Hazelcast Pods, you need to add a persistent volume in OCP. In `hazelcast-template.json` this directory is named as `/data/hazelcast`, and it should be claimed. Below, you can find how to add a persistent volume in OCP. Please notice that it is just an example of a persistent volume creation with `NFS`; there are many different ways that you can map volumes in Kubernetes and OpenShift Platform. You can find the available volumes via [this link](https://docs.openshift.com/container-platform/3.4/rest_api/kubernetes_v1.html#v1-volume)
 
 * Login to your OCP console using the command `oc login <your-ocp-url>` with `system:admin` user or rights.
 * Create a directory in master for the physical storage as shown below:
@@ -153,13 +153,13 @@ spec:
 
 Save this file. Please also notice that `Reclaim Policy` is set as `Retain`. Therefore, contents of this folder will remain as is, between successive `claims`.
 
-`your-pv-name` is important and you need to input this name to `HAZELCAST_VOLUME_NAME` during deployments with `hazelcast-template.js`.
+`your-pv-name` is important and you need to input this name to `HAZELCAST_VOLUME_NAME` during deployments with `hazelcast-template.json`.
 
 * Run `oc create -f <your-pv-yaml>` which will create a `PersistentVolume`.
 * Run `oc get pv` to verify, and you should see `STATUS` as `AVAILABLE`.
 * Go to `<your-pv-path>` and copy your custom Hazelcast configuration as `hazelcast.xml`. You may also copy or transfer `custom jars` to this directory. Make sure that your custom configuration file is named as  `hazelcast.xml`. You may use `scp` or `sftp` to transfer these files.
 
-If you need to redeploy Hazelcast cluster with `hazelcast-template.js`, first you may need to remove the logical persistent volume bindings, since their creation policy is `RETAIN`. In order to delete or tear down, please run the following commands:
+If you need to redeploy Hazelcast cluster with `hazelcast-template.json`, first you may need to remove the logical persistent volume bindings, since their creation policy is `RETAIN`. In order to delete or tear down, please run the following commands:
 
 * `oc delete pvc hz-vc` (hz-vc is the claim name from Kubernetes template, you do not need to change its name)
 * `oc delete pv <your-pv-name>`
