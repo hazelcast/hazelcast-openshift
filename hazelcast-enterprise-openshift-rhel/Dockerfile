@@ -15,7 +15,7 @@ ARG HZ_KUBE_VERSION=1.0.0
 ARG HZ_MAVEN_DIR=${HZ_VERSION}
 ARG REPOSITORY_URL=https://repository-hazelcast-l337.forge.cloudbees.com
 
-LABEL name="hazelcast/hazelcast-openshift-rhel" \
+LABEL name="hazelcast/hazelcast-enterprise-openshift-rhel" \
       vendor="Hazelcast, Inc." \
       version="7.2" \
       architecture="x86_64" \
