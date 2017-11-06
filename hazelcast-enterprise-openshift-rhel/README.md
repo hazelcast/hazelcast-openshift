@@ -202,11 +202,11 @@ You should see `<your-image-name>` under `NAME` column as below. For the below e
 
 ![image-stream](images/image-stream.png)
 
-Another important point is the `DOCKER REPO` entry for image. In the following steps we will use this path in `kubernetes-template.js` to pull the base image for our Hazelcast cluster.
+Another important point is the `DOCKER REPO` entry for image. In the following steps we will use this path in `kubernetes-template.json` to pull the base image for our Hazelcast cluster.
 
 * Click `Add to Project` and then `Import YAML/JSON` to start deploying Hazelcast cluster on OCP.
 
-* Copy and paste the contents of `kubernetes-template.js` onto the editor, or browse and upload it.
+* Copy and paste the contents of `kubernetes-template.json` onto the editor, or browse and upload it.
 
   * This template file provides sample deployment, you can change freely.
   * Please note that added `readiness` probe, which checks whether the cluster is in a safe state. Safe state means; there are   no partitions being migrated and all backups are in sync when this probe is called. If it is not suitable for you please       remove it. 
