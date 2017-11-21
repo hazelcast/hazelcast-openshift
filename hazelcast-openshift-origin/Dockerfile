@@ -1,6 +1,6 @@
-FROM hazelcast/hazelcast-kubernetes:3.9
+ARG HZ_IMAGE_TAG=latest
 
-ENV HZ_VERSION 3.9
+FROM hazelcast/hazelcast-kubernetes:${HZ_IMAGE_TAG}
 
 LABEL name="hazelcast/hazelcast-openshift-origin" \
       vendor="Hazelcast, Inc." \

@@ -1,7 +1,7 @@
-FROM hazelcast/hazelcast-enterprise-kubernetes:3.9
-MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
+ARG HZ_IMAGE_TAG=latest
 
-ENV HZ_VERSION 3.9
+FROM hazelcast/hazelcast-enterprise-kubernetes:${HZ_IMAGE_TAG}
+MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
 
 LABEL name="hazelcast/hazelcast-enterprise-openshift-centos" \
       vendor="Hazelcast, Inc." \
