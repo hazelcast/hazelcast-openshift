@@ -6,10 +6,8 @@ Hazelcast OpenShift supports:
 * `OC v1.4.1+`
 * `Kubernetes v1.4.0+`
 
-```
-Please note that docker image of this distribution also compatible with Kubernetes. Therefore, you may use
-it for deployment not only OpenShift Origin also for Kubernetes.  
-```
+_Please note that the Docker image of this distribution is based on the
+[`hazelcast-kubernetes` image](https://github.com/hazelcast/hazelcast-docker)._
 
 ## Usage
 

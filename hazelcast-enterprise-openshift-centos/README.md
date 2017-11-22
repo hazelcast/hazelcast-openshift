@@ -23,6 +23,10 @@ This package consists of the following parts:
 * Health and liveness scripts
 * Start and stop scripts
 
+
+_Please note that the Docker image of this distribution is based on the 
+[`hazelcast-enterprise-kubernetes` image](https://github.com/hazelcast/hazelcast-docker)._
+
 # Deploying
 
 ## Prerequisites
