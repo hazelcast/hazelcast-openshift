@@ -6,10 +6,8 @@ Hazelcast OpenShift supports:
 * `OC v1.4.1+`
 * `Kubernetes v1.4.0+`
 
-```
-Please note that docker image of this distribution also compatible with Kubernetes. Therefore, you may use
-it for deployment not only OpenShift Origin also for Kubernetes.  
-```
+_Please note that the Docker image of this distribution is based on the
+[`hazelcast-kubernetes` image](https://github.com/hazelcast/hazelcast-docker)._
 
 ## Usage
 
@@ -17,7 +15,7 @@ First login to OpenShift using the OpenShift CLI with the following commands:
 
 ```
 sudo su
-oc login <your-openshit-login-url>
+oc login <your-openshift-login-url>
 ```
 
 Then create a new project, e.g., `hazelcast-cluster`, and switch to that newly created using the following commands:

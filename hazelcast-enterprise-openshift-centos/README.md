@@ -23,6 +23,10 @@ This package consists of the following parts:
 * Health and liveness scripts
 * Start and stop scripts
 
+
+_Please note that the Docker image of this distribution is based on the 
+[`hazelcast-enterprise-kubernetes` image](https://github.com/hazelcast/hazelcast-docker)._
+
 # Deploying
 
 ## Prerequisites
@@ -105,11 +109,11 @@ Please note that contents of your previous deployment is preserved. If you chang
 
   ![create](images/create-new-project.png)
 
-* In the following steps we will use `kubernetes-template.js` to pull the image, which is under Hazelcast Dockerhub repo, for creating cluster with Replication configuration.
+* In the following steps we will use `kubernetes-template.json` to pull the image, which is under Hazelcast Dockerhub repo, for creating cluster with Replication configuration.
 
 * Click `Add to Project` and then `Import YAML/JSON` to start deploying Hazelcast cluster on OCP.
 
-* Copy and paste the contents of `kubernetes-template.js` onto the editor, or browse and upload it.
+* Copy and paste the contents of `kubernetes-template.json` onto the editor, or browse and upload it.
 
   * Please note that default image is `hazelcast/hazelcast-enterprise-openshift-centos:3.8.6`.
   * This template file provides sample deployment, you can change freely.
