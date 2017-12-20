@@ -107,7 +107,7 @@ Please note that contents of your previous deployment is preserved. If you chang
 
 * Create a project with `your-project-name`:
 
-  ![create](images/create-new-project.png)
+  ![create](../assets/create-new-project.png)
 
 * In the following steps we will use `kubernetes-template.json` to pull the image, which is under Hazelcast Dockerhub repo, for creating cluster with Replication configuration.
 
@@ -129,7 +129,7 @@ Please note that contents of your previous deployment is preserved. If you chang
 
 * Now it is ready to go.
 
-    ![over](images/over.png)
+    ![over](../assets/over.png)
 
 # Labels
 

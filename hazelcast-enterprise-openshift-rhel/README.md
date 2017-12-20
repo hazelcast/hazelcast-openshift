@@ -40,7 +40,7 @@ After installation of the CDK, you will need to have an up and running OpenShift
 <br>
 2) RHEL 7.3 host with Docker 1.12 installation to build Hazelcast image. Please follow [this solution](https://access.redhat.com/solutions/253273) to register and subscribe.
 
-![](images/NoteSmall.png) ***NOTE***: *You may use host machines that comes with OCP  installations.*
+![](../assets/NoteSmall.png) ***NOTE***: *You may use host machines that comes with OCP  installations.*
 
 <br>
 3) Another important note would be that this document assumes familiarity with `oc` CLI, OCP and Docker.
@@ -174,7 +174,7 @@ Please note that contents of your previous deployment is preserved. If you chang
 
 * Create a project with `your-project-name`:
 
-  ![create](images/create-new-project.png)
+  ![create](../assets/create-new-project.png)
 
 * Turn back to OCP shell and switch to your new project with the command `oc project <your-project-name>`.
 
@@ -184,11 +184,11 @@ Please note that contents of your previous deployment is preserved. If you chang
 
 * Or you may create an infrastructure project to deploy your project `imagestreams`.
 
-  ![registry](images/registry.png)
+  ![registry](../assets/registry.png)
 
 * Add route for the newly created Docker registry. Please assign `passthrough` for TLS setting:
 
-  ![registry-route](images/route-registry.png)
+  ![registry-route](../assets/route-registry.png)
  
 * Push your Hazelcast Enterprise image to this registry, as described in section [Pushing Image to Private Docker Registry in OCP](#pushing-image-to-private-docker-registry-in-ocp).
 
@@ -200,7 +200,7 @@ oc get imagestreams
 
 You should see `<your-image-name>` under `NAME` column as below. For the below example, it is named as `hz-enterprise`.
 
-![image-stream](images/image-stream.png)
+![image-stream](../assets/image-stream.png)
 
 Another important point is the `DOCKER REPO` entry for image. In the following steps we will use this path in `kubernetes-template.json` to pull the base image for our Hazelcast cluster.
 
@@ -227,7 +227,7 @@ Another important point is the `DOCKER REPO` entry for image. In the following s
 
 * Now it is ready to go.
 
-    ![over](images/over.png)
+    ![over](../assets/over.png)
 
 # Labels
 
@@ -245,4 +245,3 @@ Following labels are set for this image:
 This image exposes port 5701 as the external port for cluster communication (member to member) and between Hazelcast clients and the Hazelcast cluster (client-server).
 
 The port is reachable from the OpenShift environment only and is not registered for public reachability.
-
