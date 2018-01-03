@@ -1,5 +1,5 @@
 ARG HZ_IMAGE_TAG=3.9
-
+ENV HZ_VERSION 3.8.9
 FROM hazelcast/hazelcast-kubernetes:${HZ_IMAGE_TAG}
 
 LABEL name="hazelcast/hazelcast-openshift-origin" \
