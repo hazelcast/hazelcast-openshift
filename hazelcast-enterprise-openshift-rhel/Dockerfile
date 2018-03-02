@@ -3,7 +3,6 @@ MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
 
 ENV HZ_HOME /opt/hazelcast/
 ENV HZ_CP_MOUNT ${HZ_HOME}/external
-ENV JAVA_HOME /usr/lib/jvm/java
 ENV LANG en_US.utf8
 
 ENV USER_NAME=hazelcast
@@ -43,10 +42,10 @@ COPY README.md /tmp/
 
 RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
 ### Add necessary Red Hat repos here
-    yum-config-manager --enable rhel-7-server-rpms,rhel-7-server-optional-rpms,rhel-7-server-thirdparty-oracle-java-rpms &> /dev/null && \
+    yum-config-manager --enable rhel-7-server-rpms,rhel-7-server-optional-rpms &> /dev/null && \
     yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
 ### Add your package needs to this installation line
-    yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-oracle-devel && \
+    yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-openjdk-devel && \
 ### help markdown to man conversion
     go-md2man -in /tmp/README.md -out /help.1 && \
     yum -y remove golang-github-cpuguy83-go-md2man && \
