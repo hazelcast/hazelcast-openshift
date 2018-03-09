@@ -1,146 +1,238 @@
+This repository includes the Dockerfile and the default template configuration for Hazelcast Enterprise dedicated to the [OpenShift](https://www.openshift.com/) platform. 
 
-This repository includes a default configuration file, a template and the Docker file to deploy
-a Hazelcast Enterprise based standalone infrastructure as a
-Centos 7 based image.
+Please note that the Docker image of this distribution is based on the [`hazelcast-enterprise-kubernetes`](https://github.com/hazelcast/hazelcast-docker/tree/master/hazelcast-enterprise-kubernetes) image.
 
-- [Introduction](#introduction)
-- [Deploying](#deploying)
-- [Labels](#labels)
+### Table of Contents
+- [Usage](#usage)
+- [Getting Started](#getting-started)
+- [Custom Configuration](#custom-configuration)
+- [Development Tips](#development-tips)
 - [Security Implications](#security-implications)
 
+# Usage
 
-
-# Introduction
-
-This image simplifies the deployment of a Hazelcast Enterprise based standalone infrastructure, as a
-Centos 7 based image.
-
-This package consists of the following parts:
-
-* Hazelcast Enterprise and related dependencies
-* Centos 7
-* OpenJDK 8
-* Health and liveness scripts
-* Start and stop scripts
-
-
-_Please note that the Docker image of this distribution is based on the 
-[`hazelcast-enterprise-kubernetes` image](https://github.com/hazelcast/hazelcast-docker)._
-
-# Deploying
-
-## Prerequisites
-
-1) Up and Running OpenShift Container Platform (OCP) version 3.4 or 3.5 that you can login as `system:admin`.
-
-  * You may install OpenShift Container Development Kit from [Redhat](https://developers.redhat.com/products/cdk/download/), if you need to test on your local machine. Please note that
-downloading and installing will require Redhat subscription. Moreover, please follow the CDK installation
-[document](https://access.redhat.com/documentation/en-us/red_hat_container_development_kit/2.4/html/installation_guide/).
-After installation of the CDK, you will need to have an up and running OpenShift Container Platform virtual machine.
-
-2) Another important note would be that this document assumes familiarity with `oc` CLI, OCP and Docker.
-
-## Starting Hazelcast Enterprise Cluster
-
-Before starting to deploy your Hazelcast Enterprise cluster, make sure that you have a valid license key for Hazelcast Enterprise version. You can get a trial key from [this link](https://hazelcast.com/hazelcast-enterprise-download/trial/).
-
-### Creating Volume and Loading Custom Configurations
-
-This is a **prerequisite** step for the next section if you have custom configurations or JARs.
-
-Moreover, OCP 3.5 installations on cloud providers like AWS may not contain `Persistent Volumes`(PV). In that case, you first must create a PV to deploy Hazelcast Enterprise cluster with `hazelcast-template.json` .
-
-In order to share custom configurations or custom domain JARs (for example `EntryProcessor` implementations) between Hazelcast Enterprise Pods, you need to add a persistent volume in OCP. In `hazelcast-template.json` this directory is named as `/data/hazelcast`, and it should be claimed. Below, you can find how to add a persistent volume in OCP. Please notice that it is just an example of a persistent volume creation with `NFS`; there are many different ways that you can map volumes in Kubernetes and OpenShift Platform. You can find the available volumes via [this link](https://docs.openshift.com/container-platform/3.4/rest_api/kubernetes_v1.html#v1-volume)
-
-* Login to your OCP console using the command `oc login <your-ocp-url>` with `system:admin` user or rights.
-* Create a directory in master for the physical storage as shown below:
+You can start the Hazelcast application on OpenShift with the following command:
 
 ```
-mkdir -p <your-pv-path>
-chmod -R 777 <parent-path-to-pv> [may require root permissions]
-# Add to /etc/exports
-<your-pv-path> *(rw,root_squash)
-# Enable the new exports without bouncing the NFS service
-exportfs -a
+$ oc new-app -f hazelcast-template.json \
+  -p DEPLOYMENT_NAME=<deployment_name>  \
+  -p SERVICE_NAME=<service_name> \
+  -p NAMESPACE=<project_name> \
+  -p ENTERPRISE_LICENSE_KEY=<hazelcast_enterprise_license> \
+  -p HAZELCAST_VOLUME_NAME=<persistent_volume>
 ```
 
-`NFS` Security provisioning may be required, therefore you may need to add `nfsnobody` user and group to `<parent-path-to-pv>`. Please refer to [this link](https://docs.openshift.com/container-platform/3.4/install_config/persistent_storage/persistent_storage_nfs.html#install-config-persistent-storage-persistent-storage-nfs) for details.
+# Getting Started
 
-* Open a text editor and add the following deployment YAML for persistent volume:
+## Install OpenShift environment
+
+[Minishift](https://www.openshift.org/minishift/) toolkit is used to help with running OpenShift locally. Use the following steps to set it up:
+
+1) Install OpenShift Container Development Kit (CDK) as described [here](https://developers.redhat.com/products/cdk/download/)
+2) Configure CDK and run a first Hello World OpenShift application as described [here](https://developers.redhat.com/products/cdk/hello-world/)
+3) Make sure your `minishift` and `oc` tools are installed and ready to use
 
 ```
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: <your-pv-name>
-spec:
-  capacity:
-    storage: 2Gi
-  accessModes:
-    - ReadWriteOnce
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  nfs:
-    server: localhost
-    path: <your-pv-path>
+$ minishift version
+minishift v1.11.0+d7f374a
+CDK v3.3.0-1
+
+$ oc version
+oc v3.9.0-alpha.3+78ddc10
+kubernetes v1.9.1+a0ce1bc657
+features: Basic-Auth
 ```
 
-Save this file. Please also notice that `Reclaim Policy` is set as `Retain`. Therefore, contents of this folder will remain as is, between successive `claims`.
+## Start Hazelcast Cluster
 
-`your-pv-name` is important and you need to input this name to `HAZELCAST_VOLUME_NAME` during deployments with `hazelcast-template.json`.
+In case of Hazelcast Enterprise, make sure that you have a valid license key for Hazelcast Enterprise version. You can get a trial key from [this link](https://hazelcast.com/hazelcast-enterprise-download/trial/).
 
-* Run `oc create -f <your-pv-yaml>` which will create a `PersistentVolume`.
-* Run `oc get pv` to verify, and you should see `STATUS` as `AVAILABLE`.
-* Go to `<your-pv-path>` and copy your custom Hazelcast configuration as `hazelcast.xml`. You may also copy or transfer `custom jars` to this directory. Make sure that your custom configuration file is named as  `hazelcast.xml`. You may use `scp` or `sftp` to transfer these files.
+**1) Setup and start Minishift**
+```
+$ minishift setup-cdk
+$ minishift start
+```
 
-If you need to redeploy Hazelcast Enterprise cluster with `hazelcast-template.json`, first you may need to remove the logical persistent volume bindings, since their creation policy is `RETAIN`. In order to delete or tear down, please run the following commands:
+Note that the presented deployment process is done via the `oc` CLI tool, however each of the next steps can be also performed using OpenShift Web Console (accessed by `minishift console`).
 
-* `oc delete pvc hz-vc` (hz-vc is the claim name from Kubernetes template, you do not need to change its name)
-* `oc delete pv <your-pv-name>`
-* `oc create -f <your-pv-yaml>`
+**2) Create Project**
+```
+$ oc new-project hazelcast
+```
 
-Please note that contents of your previous deployment is preserved. If you change the claim policy to `RECYCLE`, you have to transfer all custom files to `<your-pv-path>` before each successive deployments.
+Note that the name of the project is automatically its namespace, so you need to use `hazelcast` as the namespace name in the further steps.
 
-### Deploying on Web Console
+**3) Start Hazelcast cluster**
+```
+$ oc new-app -f hazelcast-template.json \
+  -l name=hazelcast-cluster-1 \
+  -p DEPLOYMENT_NAME=hzdeployment  \
+  -p SERVICE_NAME=hzservice \
+  -p NAMESPACE=hazelcast \
+  -p ENTERPRISE_LICENSE_KEY=<hazelcast_enterprise_license> \
+  -p HAZELCAST_VOLUME_NAME=pv0001
+```
 
-* In the web browser, navigate to your OCP console page and login.
+Note that the label 'hazelcast-cluster-1', even though not mandatory, is helpful to manage all resources related to the created application.
 
-* Create a project with `your-project-name`:
+Parameters:
+* `DEPLOYMENT_NAME`: base name of the deployment unit (any string can be used)
+* `SERVICE_NAME`: service name (any string can be used)
+* `NAMESPACE`: must be the same as the OpenShift project's name
+* `ENTERPRISE_LICENSE_KEY`: Hazelcast Enterprise License (not needed for the non-enterprise version)
+* `HAZELCAST_VOLUME_NAME`: OpenShift Persistent Volume; Minishift comes with predefined Persistent Volumes (pv0001, pv0002, ..., pv0100); to create a new Persistent Volume please follow the description [here](https://developers.redhat.com/blog/2017/04/05/adding-persistent-storage-to-minishift-cdk-3-in-minutes/)
 
-  ![create](../assets/create-new-project.png)
+**4) Check that Hazelcast is running**
 
-* In the following steps we will use `kubernetes-template.json` to pull the image, which is under Hazelcast Dockerhub repo, for creating cluster with Replication configuration.
+To check all created OpenShift resources, use the `oc get all` command.
 
-* Click `Add to Project` and then `Import YAML/JSON` to start deploying Hazelcast cluster on OCP.
+```
+$ oc get all
+NAME             READY     STATUS    RESTARTS   AGE
+po/hz-rc-5pl4f   1/1       Running   0          3m
+po/hz-rc-dfz84   1/1       Running   0          3m
+po/hz-rc-pjps7   1/1       Running   0          3m
 
-* Copy and paste the contents of `kubernetes-template.json` onto the editor, or browse and upload it.
+NAME       DESIRED   CURRENT   READY     AGE
+rc/hz-rc   3         3         3         3m
 
-  * Please note that default image is `hazelcast/hazelcast-enterprise-openshift-centos:3.8.6`.
-  * This template file provides sample deployment, you can change freely.
-  * Please note that added `readiness` probe, which checks whether the cluster is in a safe state. Safe state means; there are no partitions being migrated and all backups are in sync when this probe is called. If it is not suitable for you please remove it.
+NAME            TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+svc/hzservice   ClusterIP   None         <none>        5701/TCP   3m
+```
 
-* This template file contains all the deployment information to setup a Hazelcast Enterprise cluster inside OCP. It configures the necessary `ReplicationController`, health checks and image to use. It also offers a set of properties to be requested when creating a new cluster (such as `clustername`).
+Then, to check the logs for each replica, use the following command:
 
-* Fill out the `Configuration Properties` section.
+```
+$ oc logs po/hz-rc-5pl4f
 
-* `NAMESPACE` value is important and should match with your project namespace.
+...
+Kubernetes Namespace: hazelcast
+Kubernetes Service DNS: hzservice.hazelcast.svc.cluster.local
+########################################
+# RUN_JAVA=
+# JAVA_OPTS=
+# CLASSPATH=/data/hazelcast/*:/opt/hazelcast/*:/opt/hazelcast/external/*:
+########################################
+...
+Members [3] {
+        Member [172.17.0.3]:5701 - b047e291-ebd6-4edc-8b9c-d06fcb3b9965
+        Member [172.17.0.4]:5701 - f5e6cf50-d83a-42c5-b152-2571a929fd12
+        Member [172.17.0.2]:5701 - a50f8468-0852-45d2-966a-74301e04d45e this
+}
+...
 
-* Enter your Hazelcast Enterprise license key to `ENTERPRISE_LICENSE_KEY` input section.
+```
 
-* Now it is ready to go.
+**5) Delete Hazelcast cluster**
 
-    ![over](../assets/over.png)
+To delete all resources related to the cluster (Replication Controller, Service, PODs) use the following command:
 
-# Labels
+```
+$ oc delete all -l name=hazelcast-cluster-1
+replicationcontroller "hz-rc" deleted
+service "hzservice" deleted
+```
 
+You can also delete the Persistent Storage Claim by:
 
-Following labels are set for this image:
+```
+$ oc delete pvc hz-vc
+```
 
-- `name=` : Registry location and name of the image.
+If you don't do it, then the next time you run your application, the same storage will be re-used.
 
-- `version=` : Centos version from which the container was built.
+# Custom Configuration
 
-- `release=` : Hazelcast Enterprise release version built into this image.
+In order to use a custom Hazelcast configuration (or custom domain JARs), you need to copy them into the Persistent Volume used in the application. Since the Persistent Volume is located inside the Minishift VM, you can do it using the following command:
+
+```
+$ scp -i $HOME/.minishift/machines/minishift/id_rsa hazelcast.xml docker@$(minishift ip):/mnt/sda1/var/lib/minishift/openshift.local.pv/pv0001/
+```
+
+Short explanation of the command above:
+* `$HOME/.minishift/machines/minishift/id_rsa` - ssh key to Minishift VM is stored in the Minishift's home directory
+* `hazelcast.xml` - custom configuration of Hazelcast
+* `minishift ip` - command to return the IP address of the Minishift VM
+* `/mnt/sda1/var/lib/minishift/openshift.local.pv/pv0001/` - location of the Persistent Volume `pv0001` in Minishift VM
+
+The other possibility to put a configuration inside the Minishift VM is to share a directory with the host system using [Minishift hostfolder](https://docs.openshift.org/latest/minishift/using/host-folders.html).
+
+After starting the application again, the containers use the custom Hazelcast configuration.
+
+# Development Tips
+
+## Useful commands
+
+The complete guide to the `oc` CLI tool can be found [here](https://docs.openshift.org/latest/cli_reference/index.html). Below you can see the most interesting use cases in the context of Hazelcast.
+
+**Scaling application**
+
+To scale the Hazelcast application, you can change the number of replicas in the Replication Controller. For example, to scale up to 5 replicas, use the following comamnd:
+
+```
+$ oc scale rc/hz-rc --replicas=5
+```
+
+**Exposing application**
+
+By default (as mentioned in [Security Implications](#security-implications)) the Hazelcast cluster is accessible only from the OpenShift environment. You can, however, make it accessible from outside.
+
+```
+$ oc expose svc/hzservice
+route "hzservice" exposed
+```
+
+Then, you should be able to access Hazelcast via the exposed route (you can check what the route is by `oc status` or `oc get routes/hzservice`). For example, to check the health of Hazelcast:
+
+```
+$ curl hzservice-hazelcast.192.168.1.113.nip.io/hazelcast/health
+Hazelcast::NodeState=ACTIVE
+Hazelcast::ClusterState=ACTIVE
+Hazelcast::ClusterSafe=TRUE
+Hazelcast::MigrationQueueSize=0
+Hazelcast::ClusterSize=1
+```
+
+## Local Docker images
+
+During the development process, a very common use case is to build locally own Docker images and run them on Minishift. E.g. you may want to build on top of the Hazelcast OpenShift image and check if it works, or you may want to create a seprate application and check how it interacts with Hazelcast when deployed together on OpenShift.
+
+Minishift is provided together with Docker Engine and Docker Registry. 
+
+**1) Configure access to Docker Engine**
+
+```
+$ minishift docker-env
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.99.101:2376"
+export DOCKER_CERT_PATH="/home/rafal/.minishift/certs"
+export DOCKER_API_VERSION="1.24"
+# Run this command to configure your shell:
+# eval $(minishift docker-env)
+```
+
+**2) Push into Minishift Docker Registry**
+
+The following commands push the image into Minishift Docker Registry. More details can be found [here](https://docs.openshift.org/latest/minishift/openshift/openshift-docker-registry.html).
+
+```
+$ docker login -u developer -p $(oc whoami -t) $(minishift openshift registry)
+$ docker tag my-app $(minishift openshift registry)/myproject/my-app
+$ docker push $(minishift openshift registry)/myproject/my-app
+```
+
+Then the application can be started on the OpenShift cluster with:
+```
+$ oc new-app --image-stream=my-app --name=my-app
+```
+
+## Debugging
+
+Debbuging containerized applications in the OpenShift cluster can be difficult. In order to attach to the running POD, you can use the following command:
+
+```
+oc exec -ti <pod_name> -- bash
+```
 
 # Security Implications
 
