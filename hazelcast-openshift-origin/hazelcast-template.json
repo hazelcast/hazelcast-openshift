@@ -17,7 +17,8 @@
       "apiVersion": "v1",
       "kind": "ReplicationController",
       "metadata": {
-        "generateName": "hazelcast-cluster-rc-${DEPLOYMENT_NAME}-"
+        "generateName": "hazelcast-cluster-rc-${DEPLOYMENT_NAME}-",
+        "name": "hz-rc"
       },
       "spec": {
         "replicas": 3,
@@ -33,9 +34,17 @@
             }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "hazelcast-storage",
+                "persistentVolumeClaim": {
+                  "claimName": "hz-vc"
+                }
+              }
+            ],
             "containers": [
               {
-                "image": "hazelcast/hazelcast-openshift:${HAZELCAST_VERSION}",
+                "image": "${HAZELCAST_IMAGE}",
                 "name": "hazelcast-openshift",
                 "env": [
                   {
@@ -53,6 +62,14 @@
                   {
                     "name": "HAZELCAST_KUBERNETES_SERVICE_DNS_IP_TYPE",
                     "value": "IPV4"
+                  },
+                  {
+                    "name": "HAZELCAST_KUBERNETES_SERVICE_DOMAIN",
+                    "value": "${KUBERNETES_SERVICE_DOMAIN}"
+                  },
+                  {
+                    "name": "HZ_DATA",
+                    "value": "/data/hazelcast"
                   }
                 ],
                 "ports": [
@@ -60,13 +77,34 @@
                     "containerPort": 5701,
                     "protocol": "TCP"
                   }
-                ]
+                ],
+                "volumeMounts": [
+                  {
+                    "mountPath": "/data/hazelcast",
+                    "name": "hazelcast-storage"
+                  }
+                ],
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "./readiness.sh"
+                    ]
+                  },
+                  "initialDelaySeconds": 30,
+                  "timeoutSeconds": 5
+                },
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "./liveness.sh"
+                    ]
+                  },
+                  "initialDelaySeconds": 60,
+                  "timeoutSeconds": 5
+                }
               }
             ]
           }
-        },
-        "triggers": {
-          "type": "ImageChange"
         }
       }
     },
@@ -89,9 +127,36 @@
           }
         ]
       }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "name": "hz-vc"
+      },
+      "spec": {
+        "selector": {
+          "name": "hazelcast-vc-${DEPLOYMENT_NAME}"
+        },
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        },
+        "volumeName": "${HAZELCAST_VOLUME_NAME}"
+      }
     }
   ],
   "parameters": [
+    {
+      "name": "HAZELCAST_IMAGE",
+      "description": "Defines the location of Hazelcast",
+      "value": "hazelcast/hazelcast-openshift:3.9.3",
+      "required": true
+    },
     {
       "name": "DEPLOYMENT_NAME",
       "description": "Defines the base name of this deployment unit",
@@ -104,8 +169,8 @@
     },
     {
       "name": "NAMESPACE",
-      "description": "Defines the namespace of the application POD of Kubernetes.",
-      "required": true
+      "description": "Defines the namespace of the application POD of Kubernetes, if not defined the container will use the value of /var/run/secrets/kubernetes.io/serviceaccount/namespace",
+      "required": false
     },
     {
       "name": "KUBERNETES_SERVICE_DOMAIN",
@@ -114,9 +179,9 @@
       "required": true
     },
     {
-      "name": "HAZELCAST_VERSION",
-      "description": "Defines the hazelcast version.Default is latest. eg: 3.6.1",
-      "value": "latest",
+      "name": "HAZELCAST_VOLUME_NAME",
+      "description": "Defines volume location where you put your domain classes and custom Hazelcast configuration xml file.",
+      "value": "hz-pv",
       "required": true
     }
   ]
