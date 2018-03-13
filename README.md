@@ -59,7 +59,7 @@ $ minishift setup-cdk
 $ minishift start
 ```
 
-Note that the presented deployment process is done via the `oc` CLI tool, however each of the next steps can be also performed using OpenShift Web Console (accessed by `minishift console`).
+Note that the presented deployment process is done via the `oc` CLI tool, however, each of the next steps can be also performed using OpenShift Web Console (accessed by `minishift console`).
 
 **2) Create Project**
 ```
@@ -201,7 +201,7 @@ Hazelcast::ClusterSize=1
 
 ## Local Docker images
 
-During the development process, a very common use case is to build locally own Docker images and run them on Minishift. E.g. you may want to build on top of the Hazelcast OpenShift image and check if it works, or you may want to create a seprate application and check how it interacts with Hazelcast when deployed together on OpenShift.
+During the development process, a very common use case is to build locally own Docker images and run them on Minishift. For example, you may want to create a separate application on top of the Hazelcast OpenShift image and check if it works, or you may want to create a seprate application and check how it interacts with Hazelcast when deployed together on OpenShift.
 
 Minishift is provided together with Docker Engine and Docker Registry. 
 
