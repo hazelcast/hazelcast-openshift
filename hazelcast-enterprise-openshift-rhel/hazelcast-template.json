@@ -152,6 +152,98 @@
         },
         "volumeName": "${HAZELCAST_VOLUME_NAME}"
       }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ReplicationController",
+      "metadata": {
+        "generateName": "management-center-rc-${DEPLOYMENT_NAME}-",
+        "name": "mc-rc"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "name": "management-center-node-${DEPLOYMENT_NAME}"
+        },
+        "template": {
+          "metadata": {
+            "name": "management-center-node",
+            "generateName": "management-center-node-${DEPLOYMENT_NAME}-",
+            "labels": {
+              "name": "management-center-node-${DEPLOYMENT_NAME}"
+            }
+          },
+          "spec": {
+            "volumes": [
+              {
+                "name": "management-center-storage",
+                "persistentVolumeClaim": {
+                  "claimName": "mc-vc"
+                }
+              }
+            ],
+            "containers": [
+              {
+                "image": "${MC_IMAGE}",
+                "name": "management-center-openshift",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "mountPath": "/data",
+                    "name": "management-center-storage"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "${MC_SERVICE_NAME}"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "clusterIP": "None",
+        "selector": {
+          "name": "management-center-node-${DEPLOYMENT_NAME}"
+        },
+        "ports": [
+          {
+            "port": 8080,
+            "protocol": "TCP"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "name": "mc-vc"
+      },
+      "spec": {
+        "selector": {
+          "name": "management-center-vc-${DEPLOYMENT_NAME}"
+        },
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        },
+        "volumeName": "${MC_VOLUME_NAME}"
+      }
     }
   ],
   "parameters": [
@@ -164,11 +256,13 @@
     {
       "name": "DEPLOYMENT_NAME",
       "description": "Defines the base name of this deployment unit",
+      "value": "hazelcast-deployment",
       "required": true
     },
     {
       "name": "SERVICE_NAME",
       "description": "Defines the service name of the POD to lookup of Kubernetes.",
+      "value": "hazelcast-service",
       "required": true
     },
     {
@@ -190,7 +284,25 @@
     {
       "name": "HAZELCAST_VOLUME_NAME",
       "description": "Defines volume location where you put your domain classes and custom hazelcast configuration xml file.",
-      "value": "hz-pv",
+      "value": "pv0001",
+      "required": true
+    },
+    {
+      "name": "MC_IMAGE",
+      "description": "Defines the location of Hazelcast Management Center image",
+      "value": "hazelcast/management-center-openshift:3.9.2",
+      "required": true
+    },
+    {
+      "name": "MC_SERVICE_NAME",
+      "description": "Defines the Management Center service name of the POD to lookup of Kubernetes.",
+      "value": "management-center-service",
+      "required": true
+    },
+    {
+      "name": "MC_VOLUME_NAME",
+      "description": "Defines volume location mount as Management Center Data directory.",
+      "value": "pv0002",
       "required": true
     }
   ]
