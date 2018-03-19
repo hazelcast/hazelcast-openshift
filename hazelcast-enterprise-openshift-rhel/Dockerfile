@@ -37,8 +37,11 @@ ADD stop.sh $HZ_HOME/stop.sh
 ADD liveness.sh $HZ_HOME/liveness.sh
 ADD readiness.sh $HZ_HOME/readiness.sh
 
+# Add licenses
+ADD licenses /licenses
+
 ### Atomic Help File
-COPY README.md /tmp/
+COPY description.md /tmp/
 
 RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
 ### Add necessary Red Hat repos here
@@ -47,7 +50,7 @@ RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
 ### Add your package needs to this installation line
     yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-openjdk-devel && \
 ### help markdown to man conversion
-    go-md2man -in /tmp/README.md -out /help.1 && \
+    go-md2man -in /tmp/description.md -out /help.1 && \
     yum -y remove golang-github-cpuguy83-go-md2man && \
     yum -y clean all
 

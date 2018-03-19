@@ -12,6 +12,7 @@ This repository contains the following folders:
 - [Usage](#usage)
 - [Getting Started](#getting-started)
 - [Custom Configuration](#custom-configuration)
+- [Management Center](#management-center)
 - [Development Tips](#development-tips)
 - [Security Implications](#security-implications)
 
@@ -21,11 +22,8 @@ You can start the Hazelcast application on OpenShift with the following command:
 
 ```
 $ oc new-app -f hazelcast-template.json \
-  -p DEPLOYMENT_NAME=<deployment_name>  \
-  -p SERVICE_NAME=<service_name> \
   -p NAMESPACE=<project_name> \
-  -p ENTERPRISE_LICENSE_KEY=<hazelcast_enterprise_license> \
-  -p HAZELCAST_VOLUME_NAME=<persistent_volume>
+  -p ENTERPRISE_LICENSE_KEY=<hazelcast_enterprise_license>
 ```
 
 # Getting Started
@@ -72,21 +70,21 @@ Note that the name of the project is automatically its namespace, so you need to
 ```
 $ oc new-app -f hazelcast-template.json \
   -l name=hazelcast-cluster-1 \
-  -p DEPLOYMENT_NAME=hzdeployment  \
-  -p SERVICE_NAME=hzservice \
   -p NAMESPACE=hazelcast \
-  -p ENTERPRISE_LICENSE_KEY=<hazelcast_enterprise_license> \
-  -p HAZELCAST_VOLUME_NAME=pv0001
+  -p ENTERPRISE_LICENSE_KEY=<hazelcast_enterprise_license>
 ```
 
 Note that the label 'hazelcast-cluster-1', even though not mandatory, is helpful to manage all resources related to the created application.
 
-Parameters:
-* `DEPLOYMENT_NAME`: base name of the deployment unit (any string can be used)
-* `SERVICE_NAME`: service name (any string can be used)
+Used parameters:
 * `NAMESPACE`: must be the same as the OpenShift project's name
 * `ENTERPRISE_LICENSE_KEY`: Hazelcast Enterprise License (not needed for the non-enterprise version)
-* `HAZELCAST_VOLUME_NAME`: OpenShift Persistent Volume; Minishift comes with predefined Persistent Volumes (pv0001, pv0002, ..., pv0100); to create a new Persistent Volume please follow the description [here](https://developers.redhat.com/blog/2017/04/05/adding-persistent-storage-to-minishift-cdk-3-in-minutes/)
+
+You can check other available parameters in `hazelcast-template.json`, the most interesting ones are related to Persistent Volumes:
+* `HAZELCAST_VOLUME_NAME`: Persistent Volume used for Hazelcast Home Directory (`pv0001` by default)
+* `MC_VOLUME_NAME`: Persistent Volume used for Management Center Data Directory (`pv0002` by default)
+
+Minishift comes with predefined Persistent Volumes (pv0001, pv0002, ..., pv0100). In order to create a new Persistent Volume please follow the description [here](https://developers.redhat.com/blog/2017/04/05/adding-persistent-storage-to-minishift-cdk-3-in-minutes/).
 
 **4) Check that Hazelcast is running**
 
@@ -142,7 +140,7 @@ service "hzservice" deleted
 You can also delete the Persistent Storage Claim by:
 
 ```
-$ oc delete pvc hz-vc
+$ oc delete pvc hz-vc && oc delete pvc mv-vc
 ```
 
 If you don't do it, then the next time you run your application, the same storage will be re-used.
@@ -164,6 +162,34 @@ Short explanation of the command above:
 The other possibility to put a configuration inside the Minishift VM is to share a directory with the host system using [Minishift hostfolder](https://docs.openshift.org/latest/minishift/using/host-folders.html).
 
 After starting the application again, the containers use the custom Hazelcast configuration.
+
+# Management Center
+
+The Management Center (Hazelcast Enterprise only) is already deployed together with Hazelcast nodes. In order to make it usable, you need to perform the following steps.
+
+**1) Add Management Center to Hazelcast configuration**
+
+Add the following line to `hazelcast.xml`:
+```
+<management-center enabled="true">http://management-center-service.hazelcast.svc:8080/mancenter</management-center>
+```
+
+**2) Expose Management Center**
+
+To make Management Center accessible from outside of its container, use the following command:
+
+```
+$ oc expose svc/management-center-service
+```
+
+Then, it's accessible via the exposed route, which you can check by:
+```
+$ oc get route
+NAME                        HOST/PORT                                                  PATH      SERVICES                    PORT      TERMINATION   WILDCARD
+management-center-service   management-center-service-hazelcast.192.168.1.113.nip.io             management-center-service   8080                    None
+```
+
+Then, you can access Management Center by opening `management-center-service-hazelcast.192.168.1.113.nip.io/mancenter` in your browser.
 
 # Development Tips
 
@@ -242,6 +268,6 @@ oc exec -ti <pod_name> -- bash
 
 # Security Implications
 
-This image exposes port 5701 as the external port for cluster communication (member to member) and between Hazelcast Enterprise clients and cluster (client-server).
+This image exposes port 5701 as the external port for cluster communication (member to member) and between Hazelcast clients and cluster (client-server).
 
 The port is reachable from the OpenShift environment only and is not registered for public reachability.
