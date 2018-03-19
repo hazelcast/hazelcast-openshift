@@ -37,6 +37,9 @@ ADD stop.sh $HZ_HOME/stop.sh
 ADD liveness.sh $HZ_HOME/liveness.sh
 ADD readiness.sh $HZ_HOME/readiness.sh
 
+# Add licenses
+ADD licenses /licenses
+
 ### Atomic Help File
 COPY README.md /tmp/
 
