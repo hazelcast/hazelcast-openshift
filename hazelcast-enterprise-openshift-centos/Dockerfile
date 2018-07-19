@@ -1,4 +1,4 @@
-ARG HZ_IMAGE_TAG=3.10.2
+ARG HZ_IMAGE_TAG=3.10.3
 
 FROM hazelcast/hazelcast-enterprise-kubernetes:${HZ_IMAGE_TAG}
 MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
