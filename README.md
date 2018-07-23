@@ -1,43 +1,94 @@
 # Hazelcast OpenShift
 
-This repository contains the following folders:
-
-* [Hazelcast Enterprise OpenShift](hazelcast-enterprise-openshift-centos/) (Docker Hub: [hazelcast/hazelcast-enterprise-openshift-centos](https://hub.docker.com/r/hazelcast/hazelcast-enterprise-openshift-centos/))
-* [Hazelcast Enterprise OpenShift RHEL](hazelcast-enterprise-openshift-rhel/) (Red Hat Container Catalog: [registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7](https://access.redhat.com/containers/?tab=overview#/registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7)) _Note that this image is based on RHEL and as such you need to build it from the OpenShift Docker Engine._
-* [Hazelcast OpenShift](hazelcast-openshift-origin/) (Docker Hub: [hazelcast/hazelcast-openshift](https://hub.docker.com/r/hazelcast/hazelcast-openshift/))
+This repository contains the source code for [Hazelcast Enterprise OpenShift RHEL](hazelcast-enterprise-openshift-rhel/) published in (Red Hat Container Catalog: [registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7].
 
 # Quick Start
 
 You can launch a Hazelcast cluster by starting a headless service and multiple replicas of Hazelcast image with the environment variable `HAZELCAST_KUBERNETES_SERVICE_DNS=<service_name>.<project_name>.svc`.
 
-Here's an example of the simplest template that could be used: `hazelcast-template.yml`.
+Here's an example of the simplest template that could be used: `hazelcast.yaml`.
 
 ```
 apiVersion: v1
 kind: Template
 objects:
 - apiVersion: v1
-  kind: DeploymentConfig
+  kind: ConfigMap
+  metadata:
+    name: hazelcast-configuration
+  data:
+    hazelcast.xml: |-
+      <?xml version="1.0" encoding="UTF-8"?>
+      <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.10.xsd"
+                     xmlns="http://www.hazelcast.com/schema/config"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <properties>
+          <property name="hazelcast.discovery.enabled">true</property>
+        </properties>
+        <network>
+          <join>
+            <multicast enabled="false"/>
+            <tcp-ip enabled="false" />
+            <discovery-strategies>
+              <discovery-strategy enabled="true" class="com.hazelcast.kubernetes.HazelcastKubernetesDiscoveryStrategy">
+              </discovery-strategy>
+            </discovery-strategies>
+          </join>
+        </network>
+      </hazelcast>
+
+- apiVersion: apps/v1
+  kind: StatefulSet
   metadata:
     name: hazelcast
+    labels:
+      app: hazelcast
   spec:
     replicas: 3
-    selector: 
-      name: hazelcast
+    selector:
+      matchLabels:
+        app: hazelcast
     template:
       metadata:
         labels:
-          name: hazelcast
+          app: hazelcast
       spec:
         containers:
+        - name: hazelcast-openshift
+          image: hazelcast/hazelcast:3.10.3
+          ports:
           - name: hazelcast
-            image: hazelcast/hazelcast-openshift  
-            ports:
-              - containerPort: 5701
-                protocol: TCP
-            env:
-              - name: HAZELCAST_KUBERNETES_SERVICE_DNS
-                value: hazelcast-service.<project_name>.svc
+            containerPort: 5701
+          livenessProbe:
+            httpGet:
+              path: /hazelcast/health/node-state
+              port: 5701
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /hazelcast/health/node-state
+              port: 5701
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
+          volumeMounts:
+          - name: hazelcast-storage
+            mountPath: /data/hazelcast
+          env:
+          - name: HAZELCAST_KUBERNETES_SERVICE_DNS
+            value: hazelcast-service.<project_name>.svc
+          - name: JAVA_OPTS
+            value: "-Dhazelcast.rest.enabled=true -Dhazelcast.config=/data/hazelcast/hazelcast.xml"
+        volumes:
+        - name: hazelcast-storage
+          configMap:
+            name: hazelcast-configuration
 
 - apiVersion: v1
   kind: Service
@@ -46,11 +97,11 @@ objects:
   spec:
     type: ClusterIP
     clusterIP: None
-    ports:
-      - port: 5701
-        protocol: TCP
     selector:
-      name: hazelcast
+      app: hazelcast
+    ports:
+    - protocol: TCP
+      port: 5701
 ```
 
 Then, the following command starts the cluster:
@@ -59,7 +110,7 @@ Then, the following command starts the cluster:
 oc new-app -f hazelcast-template.yml
 ```
 
-In case of Hazelcast Enterprise, the `hazelcast/hazelcast-enterprise-openshift-centos` image must be used with the additional environment variable:
+In case of Hazelcast Enterprise, the `hazelcast/hazelcast-enterprise` image must be used with the additional environment variable:
 
 ```
 env:
