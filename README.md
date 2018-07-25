@@ -1,12 +1,14 @@
 # Hazelcast OpenShift
 
-This repository contains the source code for [Hazelcast Enterprise OpenShift RHEL](hazelcast-enterprise-openshift-rhel/) published in (Red Hat Container Catalog: [registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7].
+Hazelcast Enterprise is available on the OpenShift platform in a form of a dedicated Docker image [`registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7`](https://access.redhat.com/containers/?tab=overview#/registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7) published in [Red Hat Container Catalog](https://access.redhat.com/containers/).
 
 # Quick Start
 
-You can launch a Hazelcast cluster by starting a headless service and multiple replicas of Hazelcast image with the environment variable `HAZELCAST_KUBERNETES_SERVICE_DNS=<service_name>.<project_name>.svc`.
+Create an OpenShift secret with the Hazelcast Enterprise License Key.
 
-Here's an example of the simplest template that could be used: `hazelcast.yaml`.
+    $ oc create secret generic hz-enterprise-license --from-literal=key=LICENSE-KEY-HERE
+
+Then, here's an example of a simple template that can be used to start a Hazelcast cluster (don't forget to fill the `<project_name>`).
 
 ```
 apiVersion: v1
@@ -55,7 +57,7 @@ objects:
       spec:
         containers:
         - name: hazelcast-openshift
-          image: hazelcast/hazelcast:3.10.3
+          image: registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7
           ports:
           - name: hazelcast
             containerPort: 5701
@@ -83,6 +85,11 @@ objects:
           env:
           - name: HAZELCAST_KUBERNETES_SERVICE_DNS
             value: hazelcast-service.<project_name>.svc
+          - name: HZ_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: hz-enterprise-license
+                key: key
           - name: JAVA_OPTS
             value: "-Dhazelcast.rest.enabled=true -Dhazelcast.config=/data/hazelcast/hazelcast.xml"
         volumes:
@@ -104,27 +111,10 @@ objects:
       port: 5701
 ```
 
-Then, the following command starts the cluster:
+If you save it as  `hazelcast.yaml`, then use the following command to start the cluster.
 
-```
-oc new-app -f hazelcast-template.yml
-```
-
-In case of Hazelcast Enterprise, the `hazelcast/hazelcast-enterprise` image must be used with the additional environment variable:
-
-```
-env:
-  - name: HZ_LICENSE_KEY
-    value: <hazelcast_license_key>
-```
-
-# Hazelcast Client
-
-If the client application is inside the OpenShift project, then it can use `HazelcastKubernetesDiscoveryStrategy` as presented in [Complete Example](#complete-example).
-
-If the client application is outside the OpenShift project, then the cluster needs to be exposed by the service with `externalIP` and the Hazelcast client needs to have the Smart Routing feature disabled ([example](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift#external-hazelcast-client)).
-
+    $ oc new-app -f hazelcast.yaml
 
 # Complete Example
 
-For the complete example of using Hazelcast OpenShift image in a cluster, please see [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift).
+For the complete example of how to set up the OpenShift environment, use Hazelcast OpenShift together with Hazelcast Management Center, and use Hazelcast Client, please refer to [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift).
