@@ -1,43 +1,101 @@
 # Hazelcast OpenShift
 
-This repository contains the following folders:
-
-* [Hazelcast Enterprise OpenShift](hazelcast-enterprise-openshift-centos/) (Docker Hub: [hazelcast/hazelcast-enterprise-openshift-centos](https://hub.docker.com/r/hazelcast/hazelcast-enterprise-openshift-centos/))
-* [Hazelcast Enterprise OpenShift RHEL](hazelcast-enterprise-openshift-rhel/) (Red Hat Container Catalog: [registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7](https://access.redhat.com/containers/?tab=overview#/registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7)) _Note that this image is based on RHEL and as such you need to build it from the OpenShift Docker Engine._
-* [Hazelcast OpenShift](hazelcast-openshift-origin/) (Docker Hub: [hazelcast/hazelcast-openshift](https://hub.docker.com/r/hazelcast/hazelcast-openshift/))
+Hazelcast Enterprise is available on the OpenShift platform in a form of a dedicated Docker image [`registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7`](https://access.redhat.com/containers/?tab=overview#/registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7) published in [Red Hat Container Catalog](https://access.redhat.com/containers/).
 
 # Quick Start
 
-You can launch a Hazelcast cluster by starting a headless service and multiple replicas of Hazelcast image with the environment variable `HAZELCAST_KUBERNETES_SERVICE_DNS=<service_name>.<project_name>.svc`.
+Create an OpenShift secret with the Hazelcast Enterprise License Key.
 
-Here's an example of the simplest template that could be used: `hazelcast-template.yml`.
+    $ oc create secret generic hz-enterprise-license --from-literal=key=LICENSE-KEY-HERE
+
+Then, here's an example of a simple template that can be used to start a Hazelcast cluster (don't forget to replace `<project_name>` of `HAZELCAST_KUBERNETES_SERVICE_DNS` in the template).
 
 ```
 apiVersion: v1
 kind: Template
 objects:
 - apiVersion: v1
-  kind: DeploymentConfig
+  kind: ConfigMap
+  metadata:
+    name: hazelcast-configuration
+  data:
+    hazelcast.xml: |-
+      <?xml version="1.0" encoding="UTF-8"?>
+      <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.10.xsd"
+                     xmlns="http://www.hazelcast.com/schema/config"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <properties>
+          <property name="hazelcast.discovery.enabled">true</property>
+        </properties>
+        <network>
+          <join>
+            <multicast enabled="false"/>
+            <tcp-ip enabled="false" />
+            <discovery-strategies>
+              <discovery-strategy enabled="true" class="com.hazelcast.kubernetes.HazelcastKubernetesDiscoveryStrategy">
+              </discovery-strategy>
+            </discovery-strategies>
+          </join>
+        </network>
+      </hazelcast>
+
+- apiVersion: apps/v1
+  kind: StatefulSet
   metadata:
     name: hazelcast
+    labels:
+      app: hazelcast
   spec:
     replicas: 3
-    selector: 
-      name: hazelcast
+    selector:
+      matchLabels:
+        app: hazelcast
     template:
       metadata:
         labels:
-          name: hazelcast
+          app: hazelcast
       spec:
         containers:
+        - name: hazelcast-openshift
+          image: registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7:3.10.2
+          ports:
           - name: hazelcast
-            image: hazelcast/hazelcast-openshift  
-            ports:
-              - containerPort: 5701
-                protocol: TCP
-            env:
-              - name: HAZELCAST_KUBERNETES_SERVICE_DNS
-                value: hazelcast-service.<project_name>.svc
+            containerPort: 5701
+          livenessProbe:
+            httpGet:
+              path: /hazelcast/health/node-state
+              port: 5701
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /hazelcast/health/node-state
+              port: 5701
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
+          volumeMounts:
+          - name: hazelcast-storage
+            mountPath: /data/hazelcast
+          env:
+          - name: HAZELCAST_KUBERNETES_SERVICE_DNS
+            value: hazelcast-service.<project_name>.svc
+          - name: HZ_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: hz-enterprise-license
+                key: key
+          - name: JAVA_OPTS
+            value: "-Dhazelcast.rest.enabled=true -Dhazelcast.config=/data/hazelcast/hazelcast.xml"
+        volumes:
+        - name: hazelcast-storage
+          configMap:
+            name: hazelcast-configuration
 
 - apiVersion: v1
   kind: Service
@@ -46,34 +104,22 @@ objects:
   spec:
     type: ClusterIP
     clusterIP: None
-    ports:
-      - port: 5701
-        protocol: TCP
     selector:
-      name: hazelcast
+      app: hazelcast
+    ports:
+    - protocol: TCP
+      port: 5701
 ```
 
-Then, the following command starts the cluster:
+If you save it as  `hazelcast.yaml`, then use the following command to start the cluster.
 
-```
-oc new-app -f hazelcast-template.yml
-```
-
-In case of Hazelcast Enterprise, the `hazelcast/hazelcast-enterprise-openshift-centos` image must be used with the additional environment variable:
-
-```
-env:
-  - name: HZ_LICENSE_KEY
-    value: <hazelcast_license_key>
-```
-
-# Hazelcast Client
-
-If the client application is inside the OpenShift project, then it can use `HazelcastKubernetesDiscoveryStrategy` as presented in [Complete Example](#complete-example).
-
-If the client application is outside the OpenShift project, then the cluster needs to be exposed by the service with `externalIP` and the Hazelcast client needs to have the Smart Routing feature disabled ([example](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift#external-hazelcast-client)).
-
+    $ oc new-app -f hazelcast.yaml
 
 # Complete Example
 
-For the complete example of using Hazelcast OpenShift image in a cluster, please see [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift).
+For the complete example, please refer to [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift). It presents how to:
+ * Set up the OpenShift environment
+ * Start a Hazelcast cluster
+ * Start Hazelcast Management Center
+ * Use Hazelcast Client
+
