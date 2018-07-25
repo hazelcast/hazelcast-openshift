@@ -8,7 +8,7 @@ Create an OpenShift secret with the Hazelcast Enterprise License Key.
 
     $ oc create secret generic hz-enterprise-license --from-literal=key=LICENSE-KEY-HERE
 
-Then, here's an example of a simple template that can be used to start a Hazelcast cluster (don't forget to fill the `<project_name>`).
+Then, here's an example of a simple template that can be used to start a Hazelcast cluster (don't forget to replace `<project_name>` of `HAZELCAST_KUBERNETES_SERVICE_DNS` in the template).
 
 ```
 apiVersion: v1
@@ -117,4 +117,9 @@ If you save it as  `hazelcast.yaml`, then use the following command to start the
 
 # Complete Example
 
-For the complete example of how to set up the OpenShift environment, use Hazelcast OpenShift together with Hazelcast Management Center, and use Hazelcast Client, please refer to [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift).
+For the complete example, please refer to [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift). It presents how to:
+ * Set up the OpenShift environment
+ * Start a Hazelcast cluster
+ * Start Hazelcast Management Center
+ * Use Hazelcast Client
+
