@@ -57,7 +57,7 @@ objects:
       spec:
         containers:
         - name: hazelcast-openshift
-          image: registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7
+          image: registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7:3.10.2
           ports:
           - name: hazelcast
             containerPort: 5701
