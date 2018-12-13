@@ -117,6 +117,8 @@ If you save it as  `hazelcast.yaml`, then use the following command to start the
 
     $ oc new-app -f hazelcast.yaml
 
+**Note**: *You should always use `<kubernetes>` discovery in OpenShift; defining static IPs usually does not make sense, since POD IP is dynamically assigned.*
+
 # Enabling Security
 
 [Hazelcast Security Features](https://docs.hazelcast.org/docs/latest/manual/html-single/#security) can be used in the OpenShift environment. The most popular one is to use SSL for the communication. To enable it, you need to either mount a volume with `keystore`/`truststore` or include them into the Docker image. Then, in your Hazelcast configuration, add the following part:
