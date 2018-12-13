@@ -140,6 +140,8 @@ If you save it as  `hazelcast.yaml`, then use the following command to start the
 
 For more information, please check the [Kubernetes SSL Code Sample](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/kubernetes/samples/ssl).
 
+**Note**: *Currently, SSL Mutual Authentication does not work with `livenessProbe`/`readinessProbe` enabled.*
+
 # Complete Example
 
 For the complete example, please refer to [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift). It presents how to:
