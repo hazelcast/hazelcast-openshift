@@ -14,10 +14,21 @@
       <version>${hazelcast-kubernetes-version}</version>
       <exclusions>
         <exclusion>
-	  <groupId>com.hazelcast</groupId>
-	  <artifactId>hazelcast</artifactId>
-	</exclusion>
+          <groupId>com.hazelcast</groupId>
+          <artifactId>hazelcast</artifactId>
+        </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-tcnative</artifactId>
+      <version>${netty-tcnative.version}</version>
+      <classifier>linux-x86_64-fedora</classifier>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>${netty.version}</version>
     </dependency>
   </dependencies>
   <build>

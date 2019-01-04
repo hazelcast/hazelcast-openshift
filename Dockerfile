@@ -13,6 +13,8 @@ ENV HZ_VERSION 3.11
 ARG HZ_KUBE_VERSION=1.3.1
 ARG HZ_MAVEN_DIR=${HZ_VERSION}
 ARG REPOSITORY_URL=https://repository-hazelcast-l337.forge.cloudbees.com
+ARG NETTY_VERSION=4.1.32.Final
+ARG NETTY_TCNATIVE_VERSION=2.0.20.Final
 
 LABEL name="hazelcast/hazelcast-enterprise-openshift-rhel" \
       vendor="Hazelcast, Inc." \
@@ -46,7 +48,7 @@ RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
     yum-config-manager --enable rhel-7-server-rpms,rhel-7-server-optional-rpms &> /dev/null && \
     yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
 ### Add your package needs to this installation line
-    yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-openjdk-devel && \
+    yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-openjdk-devel apr openssl && \
 ### help markdown to man conversion
     go-md2man -in /tmp/description.md -out /help.1 && \
     yum -y remove golang-github-cpuguy83-go-md2man && \
@@ -73,7 +75,11 @@ RUN chmod +x $HZ_HOME/*.sh
 USER $USER_UID
 RUN cd mvnw && \
     chmod +x mvnw && \
-    ./mvnw -f dependency-copy.xml -Dhazelcast-kubernetes-version=${HZ_KUBE_VERSION} dependency:copy-dependencies && \
+    ./mvnw -f dependency-copy.xml \
+    -Dhazelcast-kubernetes-version=${HZ_KUBE_VERSION} \
+    -Dnetty.version=${NETTY_VERSION} \
+    -Dnetty-tcnative.version=${NETTY_TCNATIVE_VERSION} \
+    dependency:copy-dependencies && \
     cd .. && \
     rm -rf $HZ_HOME/mvnw && \
     rm -rf $HZ_HOME/.m2 && \
