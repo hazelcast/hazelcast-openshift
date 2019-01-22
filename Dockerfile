@@ -12,7 +12,7 @@ ENV HZ_VERSION 3.11
 
 ARG HZ_KUBE_VERSION=1.3.1
 ARG HZ_MAVEN_DIR=${HZ_VERSION}
-ARG REPOSITORY_URL=https://repository-hazelcast-l337.forge.cloudbees.com
+ARG REPOSITORY_URL=https://repository.hazelcast.com
 ARG NETTY_VERSION=4.1.32.Final
 ARG NETTY_TCNATIVE_VERSION=2.0.20.Final
 
