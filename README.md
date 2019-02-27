@@ -30,7 +30,7 @@ objects:
   data:
     hazelcast.xml: |-
       <?xml version="1.0" encoding="UTF-8"?>
-      <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.10.xsd"
+      <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.12.xsd"
                      xmlns="http://www.hazelcast.com/schema/config"
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <network>
@@ -144,6 +144,10 @@ For more information, please check the [Kubernetes SSL Code Sample](https://gith
 
 **Note**: *Currently, SSL Mutual Authentication does not work with `livenessProbe`/`readinessProbe` enabled.*
 
+# WAN Replication
+
+To enable WAN Replication, you need to expose your Hazelcast cluster with an OpenShift service (`LoadBalancer` or `NodePort`). Then use its external address in the publisher cluster WAN Configuration (in the `endpoints` property).
+
 # Complete Example
 
 For the complete example, please refer to [Hazelcast Code Samples](https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/openshift). It presents how to:
@@ -151,4 +155,5 @@ For the complete example, please refer to [Hazelcast Code Samples](https://githu
  * Start a Hazelcast cluster
  * Start Hazelcast Management Center
  * Use Hazelcast Client
+ * Enable WAN Replication
 
