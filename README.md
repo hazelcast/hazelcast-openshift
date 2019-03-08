@@ -30,7 +30,7 @@ objects:
   data:
     hazelcast.xml: |-
       <?xml version="1.0" encoding="UTF-8"?>
-      <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.12.xsd"
+      <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config.xsd"
                      xmlns="http://www.hazelcast.com/schema/config"
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <network>
