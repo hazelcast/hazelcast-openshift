@@ -10,7 +10,6 @@ ENV USER_UID=10001
 
 ENV HZ_VERSION 3.12
 
-ARG HZ_KUBE_VERSION=1.3.1
 ARG HZ_MAVEN_DIR=${HZ_VERSION}
 ARG REPOSITORY_URL=https://repository.hazelcast.com
 ARG NETTY_VERSION=4.1.32.Final
@@ -76,7 +75,6 @@ USER $USER_UID
 RUN cd mvnw && \
     chmod +x mvnw && \
     ./mvnw -f dependency-copy.xml \
-    -Dhazelcast-kubernetes-version=${HZ_KUBE_VERSION} \
     -Dnetty.version=${NETTY_VERSION} \
     -Dnetty-tcnative.version=${NETTY_TCNATIVE_VERSION} \
     dependency:copy-dependencies && \
