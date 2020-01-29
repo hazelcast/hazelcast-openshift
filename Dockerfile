@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/rhel7
+FROM registry.access.redhat.com/ubi8/ubi
 MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
 
 ENV HZ_HOME /opt/hazelcast/
@@ -17,16 +17,16 @@ ARG NETTY_TCNATIVE_VERSION=2.0.20.Final
 
 LABEL name="hazelcast/hazelcast-enterprise-openshift-rhel" \
       vendor="Hazelcast, Inc." \
-      version="7.2" \
+      version="8.1" \
       architecture="x86_64" \
       release="${HZ_VERSION}" \
       url="http://www.hazelcast.com" \
-      summary="Hazelcast Openshift Image, certified to RHEL 7" \
+      summary="Hazelcast Openshift Image, certified to RHEL 8" \
       description="Starts a standalone Hazelcast server instance to form a cluster based on kubernetes discovery inside Openshift" \
       io.k8s.description="Starts a standalone Hazelcast server instance to form a cluster based on kubernetes discovery inside Openshift" \
       io.k8s.display-name="Hazelcast" \
       io.openshift.expose-services="5701:tcp" \
-      io.openshift.tags="hazelcast,java8,kubernetes,rhel7"
+      io.openshift.tags="hazelcast,java8,kubernetes,rhel8"
 
 RUN mkdir -p $HZ_HOME
 RUN mkdir -p $HZ_CP_MOUNT
@@ -42,16 +42,20 @@ ADD licenses /licenses
 ### Atomic Help File
 COPY description.md /tmp/
 
-RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
-### Add necessary Red Hat repos here
-    yum-config-manager --enable rhel-7-server-rpms,rhel-7-server-optional-rpms &> /dev/null && \
-    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
+### Disable subscription-manager plugin to prevent redundant logs
+RUN sed -i 's/^enabled=.*/enabled=0/g' /etc/dnf/plugins/subscription-manager.conf
+
+RUN dnf config-manager --disable && \
+    dnf update -y  && rm -rf /var/cache/dnf && \
+    dnf -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
 ### Add your package needs to this installation line
-    yum -y install --setopt=tsflags=nodocs golang-github-cpuguy83-go-md2man java-1.8.0-openjdk-devel apr openssl && \
-### help markdown to man conversion
+    dnf -y --setopt=tsflags=nodocs install java-1.8.0-openjdk-devel apr openssl &> /dev/null && \
+### Install go-md2man to help markdown to man conversion
+    dnf -y --setopt=tsflags=nodocs install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm &> /dev/null && \
+    dnf -y --setopt=tsflags=nodocs install golang-github-cpuguy83-go-md2man &> /dev/null && \
     go-md2man -in /tmp/description.md -out /help.1 && \
-    yum -y remove golang-github-cpuguy83-go-md2man && \
-    yum -y clean all
+    dnf -y remove golang-github-cpuguy83-go-md2man && \
+    dnf -y clean all
 
 ### add hazelcast enterprise
 ADD ${REPOSITORY_URL}/release/com/hazelcast/hazelcast-enterprise-all/${HZ_VERSION}/hazelcast-enterprise-all-${HZ_VERSION}.jar $HZ_HOME
