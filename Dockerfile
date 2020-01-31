@@ -8,7 +8,7 @@ ENV LANG en_US.utf8
 ENV USER_NAME=hazelcast
 ENV USER_UID=10001
 
-ENV HZ_VERSION 3.12.6
+ENV HZ_VERSION 3.12.5
 
 ARG HZ_MAVEN_DIR=${HZ_VERSION}
 ARG REPOSITORY_URL=https://repository.hazelcast.com
@@ -55,6 +55,7 @@ RUN yum clean all && yum-config-manager --disable \* &> /dev/null && \
 
 ### add hazelcast enterprise
 ADD ${REPOSITORY_URL}/release/com/hazelcast/hazelcast-enterprise-all/${HZ_VERSION}/hazelcast-enterprise-all-${HZ_VERSION}.jar $HZ_HOME
+COPY hazelcast-kubernetes-1.5.3.jar $HZ_HOME
 
 ### Adding Logging redirector
 ADD https://repo1.maven.org/maven2/org/slf4j/jul-to-slf4j/1.7.12/jul-to-slf4j-1.7.12.jar $HZ_HOME
