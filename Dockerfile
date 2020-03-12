@@ -1,19 +1,18 @@
 FROM registry.access.redhat.com/ubi8/ubi
 MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
 
-ENV HZ_HOME /opt/hazelcast/
-ENV HZ_CP_MOUNT ${HZ_HOME}/external
-ENV LANG en_US.utf8
-
-ENV USER_NAME=hazelcast
-ENV USER_UID=10001
+ENV HZ_HOME="/opt/hazelcast" \
+    HZ_CP_MOUNT="${HZ_HOME}/external" \
+    LANG="en_US.utf8" \
+    USER_NAME="hazelcast" \
+    USER_UID=10001
 
 ENV HZ_VERSION 4.0
 
-ARG HZ_MAVEN_DIR=${HZ_VERSION}
-ARG REPOSITORY_URL=https://repository.hazelcast.com
-ARG NETTY_VERSION=4.1.32.Final
-ARG NETTY_TCNATIVE_VERSION=2.0.20.Final
+ARG NETTY_VERSION=4.1.47.Final
+ARG NETTY_TCNATIVE_VERSION=2.0.29.Final
+ARG JCACHE_VERSION=1.1.1
+ARG SLF4J_VERSION=1.7.12
 
 LABEL name="hazelcast/hazelcast-enterprise-openshift-rhel" \
       vendor="Hazelcast, Inc." \
@@ -28,24 +27,17 @@ LABEL name="hazelcast/hazelcast-enterprise-openshift-rhel" \
       io.openshift.expose-services="5701:tcp" \
       io.openshift.tags="hazelcast,java8,kubernetes,rhel8"
 
-RUN mkdir -p $HZ_HOME
-RUN mkdir -p $HZ_CP_MOUNT
-WORKDIR $HZ_HOME
-
-ADD hazelcast.xml $HZ_HOME/hazelcast.xml
-ADD start.sh $HZ_HOME/start.sh
-ADD stop.sh $HZ_HOME/stop.sh
-
-# Add licenses
-ADD licenses /licenses
+COPY *.xml *.sh $HZ_HOME/
+COPY licenses $HZ_HOME/licenses
+COPY mvnw $HZ_HOME/mvnw
 
 ### Atomic Help File
 COPY description.md /tmp/
 
+RUN mkdir -p "$HZ_HOME" "$HZ_CP_MOUNT" && \
 ### Disable subscription-manager plugin to prevent redundant logs
-RUN sed -i 's/^enabled=.*/enabled=0/g' /etc/dnf/plugins/subscription-manager.conf
-
-RUN dnf config-manager --disable && \
+    sed -i 's/^enabled=.*/enabled=0/g' /etc/dnf/plugins/subscription-manager.conf && \
+    dnf config-manager --disable && \
     dnf update -y  && rm -rf /var/cache/dnf && \
     dnf -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
 ### Add your package needs to this installation line
@@ -55,37 +47,22 @@ RUN dnf config-manager --disable && \
     dnf -y --setopt=tsflags=nodocs install golang-github-cpuguy83-go-md2man &> /dev/null && \
     go-md2man -in /tmp/description.md -out /help.1 && \
     dnf -y remove golang-github-cpuguy83-go-md2man && \
-    dnf -y clean all
-
-### add hazelcast enterprise
-ADD ${REPOSITORY_URL}/release/com/hazelcast/hazelcast-enterprise-all/${HZ_VERSION}/hazelcast-enterprise-all-${HZ_VERSION}.jar $HZ_HOME
-
-### Adding Logging redirector
-ADD https://repo1.maven.org/maven2/org/slf4j/jul-to-slf4j/1.7.12/jul-to-slf4j-1.7.12.jar $HZ_HOME
-
-### Adding JCache
-ADD https://repo1.maven.org/maven2/javax/cache/cache-api/1.0.0/cache-api-1.0.0.jar $HZ_HOME
-
-### Adding maven wrapper, downloading Hazelcast Kubernetes discovery plugin and dependencies and cleaning up
-COPY mvnw $HZ_HOME/mvnw
-
-### Configure Hazelcast
-RUN useradd -l -u $USER_UID -r -g 0 -d $HZ_HOME -s /sbin/nologin -c "${USER_UID} application user" $USER_NAME
-RUN chown -R $USER_UID:0 $HZ_HOME $HZ_CP_MOUNT
-RUN chmod +x $HZ_HOME/*.sh
-
-### Switch to hazelcast user
-USER $USER_UID
-RUN cd mvnw && \
-    chmod +x mvnw && \
+    dnf -y clean all && \
+    useradd -l -u $USER_UID -r -g 0 -d $HZ_HOME -s /sbin/nologin -c "${USER_UID} application user" $USER_NAME && \
+    chown -R $USER_UID:0 $HZ_HOME $HZ_CP_MOUNT && \
+    chmod -R g=u "$HZ_HOME" && \
+    chmod -R +r $HZ_HOME && \
+    cd "$HZ_HOME/mvnw" && \
     ./mvnw -f dependency-copy.xml \
     -Dnetty.version=${NETTY_VERSION} \
     -Dnetty-tcnative.version=${NETTY_TCNATIVE_VERSION} \
     dependency:copy-dependencies && \
-    cd .. && \
-    rm -rf $HZ_HOME/mvnw && \
-    rm -rf $HZ_HOME/.m2 && \
-    chmod -R +r $HZ_HOME
+    rm -rf "$HZ_HOME/mvnw" "$HZ_HOME/.m2"
+
+WORKDIR $HZ_HOME
+
+### Switch to hazelcast user
+USER $USER_UID
 
 ### Expose port
 EXPOSE 5701
