@@ -1,0 +1,26 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: docker build -t hazelcast-openshift .
+    - name: Verify
+      env:
+        HZ_LICENSE_KEY: ${{ secrets.HZ_LICENSE_KEY }}
+      run: |
+        echo 'hazelcast: {}' > /tmp/hazelcast.yml
+        docker run --name hazelcast-openshift-container -v /tmp:/mnt \
+          -e HZ_LICENSE_KEY=$HZ_LICENSE_KEY \
+          -e JAVA_OPTS=-Dhazelcast.config=/mnt/hazelcast.yml \
+          -d --rm hazelcast-openshift
+        sleep 10
+        HZ_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' hazelcast-openshift-container)
+        nc -z $HZ_IP 5701
