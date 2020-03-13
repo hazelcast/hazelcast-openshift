@@ -20,7 +20,12 @@ jobs:
         docker run --name hazelcast-openshift-container -v /tmp:/mnt \
           -e HZ_LICENSE_KEY=$HZ_LICENSE_KEY \
           -e JAVA_OPTS=-Dhazelcast.config=/mnt/hazelcast.yml \
-          -d --rm hazelcast-openshift
+          -d hazelcast-openshift
         sleep 10
-        HZ_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' hazelcast-openshift-container)
-        nc -z $HZ_IP 5701
+        docker logs hazelcast-openshift-container
+        if [ -n "$HZ_LICENSE_KEY" ]; then
+          HZ_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' hazelcast-openshift-container)
+          nc -z $HZ_IP 5701
+        else
+          docker logs hazelcast-openshift-container 2>&1 | grep -q InvalidLicenseException
+        fi
