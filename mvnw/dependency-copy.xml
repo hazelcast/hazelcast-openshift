@@ -11,12 +11,12 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-tcnative-boringssl-static</artifactId>
-            <version>${netty-tcnative.version}</version>
+            <version>${env.NETTY_TCNATIVE_VERSION}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
+            <version>${env.NETTY_VERSION}</version>
         </dependency>
         <dependency>
             <groupId>javax.cache</groupId>

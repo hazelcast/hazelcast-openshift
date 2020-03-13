@@ -53,10 +53,7 @@ RUN mkdir -p "$HZ_HOME" "$HZ_CP_MOUNT" && \
     chmod -R g=u "$HZ_HOME" && \
     chmod -R +r $HZ_HOME && \
     cd "$HZ_HOME/mvnw" && \
-    ./mvnw -f dependency-copy.xml \
-    -Dnetty.version=${NETTY_VERSION} \
-    -Dnetty-tcnative.version=${NETTY_TCNATIVE_VERSION} \
-    dependency:copy-dependencies && \
+    ./mvnw -f dependency-copy.xml dependency:copy-dependencies && \
     rm -rf "$HZ_HOME/mvnw" "$HZ_HOME/.m2"
 
 WORKDIR $HZ_HOME
