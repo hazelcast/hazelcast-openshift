@@ -27,8 +27,8 @@ LABEL name="hazelcast/hazelcast-enterprise-openshift-rhel" \
       io.openshift.expose-services="5701:tcp" \
       io.openshift.tags="hazelcast,java8,kubernetes,rhel8"
 
-COPY *.xml *.sh $HZ_HOME/
-COPY licenses $HZ_HOME/licenses
+COPY *.yaml *.sh $HZ_HOME/
+COPY licenses /licenses
 COPY mvnw $HZ_HOME/mvnw
 
 ### Atomic Help File
