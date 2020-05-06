@@ -59,7 +59,7 @@ RUN mkdir -p "${HZ_HOME}/lib" "$HZ_CP_MOUNT" \
     && dnf update -y  && rm -rf /var/cache/dnf \
     && dnf -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs \
     && echo "Installing new packages" \
-    && dnf -y --setopt=tsflags=nodocs install java-11-openjdk apr openssl &> /dev/null \
+    && dnf -y --setopt=tsflags=nodocs install java-11-openjdk &> /dev/null \
     && dnf -y clean all \
     && echo "Downloading Hazelcast and related JARs" \
     && cd "${HZ_HOME}/lib" \
