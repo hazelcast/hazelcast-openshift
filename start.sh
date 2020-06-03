@@ -39,5 +39,5 @@ then
 	java -server $JAVA_OPTS -Dhazelcast.config=$FILE -Djava.net.preferIPv4Stack=true -Dhazelcast.enterprise.license.key=$HZ_LICENSE_KEY com.hazelcast.core.server.StartServer
 else
 	echo "no custom configuration found"
-	java -server $JAVA_OPTS -Dhazelcast.http.healthcheck.enabled=true -Djava.net.preferIPv4Stack=true -Dhazelcast.enterprise.license.key=$HZ_LICENSE_KEY com.hazelcast.core.server.StartServer
+	java -server $JAVA_OPTS -Djava.net.preferIPv4Stack=true -Dhazelcast.enterprise.license.key=$HZ_LICENSE_KEY com.hazelcast.core.server.StartServer
 fi
