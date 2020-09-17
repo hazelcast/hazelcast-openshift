@@ -1,6 +1,6 @@
 # Hazelcast OpenShift
 
-Hazelcast Enterprise is available on the OpenShift platform in a form of a dedicated Docker image [`registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7`](https://access.redhat.com/containers/?tab=overview#/registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7) published in [Red Hat Container Catalog](https://access.redhat.com/containers/).
+Hazelcast Enterprise is available on the OpenShift platform in a form of a dedicated Docker image [registry.connect.redhat.com/hazelcast/hazelcast-enterprise-4-rhel8`](https://catalog.redhat.com/software/containers/hazelcast/hazelcast-enterprise-4-rhel8/5ee38856ecb5246c090412bd) published in [Red Hat Container Catalog](https://access.redhat.com/containers/).
 
 # Quick Start
 
@@ -59,7 +59,7 @@ objects:
       spec:
         containers:
         - name: hazelcast-openshift
-          image: registry.connect.redhat.com/hazelcast/hazelcast-3-rhel7:<image-version>
+          image: registry.connect.redhat.com/hazelcast/hazelcast-enterprise-4-rhel8:<image-version>
           ports:
           - name: hazelcast
             containerPort: 5701
