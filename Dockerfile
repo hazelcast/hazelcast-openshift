@@ -64,6 +64,7 @@ RUN mkdir -p "${HZ_HOME}/lib" "$HZ_CP_MOUNT" \
     && echo "Downloading Hazelcast and related JARs" \
     && cd "${HZ_HOME}/lib" \
     && for JAR_URL in ${HAZELCAST_ALL_URL} ${CACHE_API_URL} ${PROMETHEUS_AGENT_URL} ${NETTY_URL} ${NETTY_TCNATIVE_URL} ${SLF4J_URLS}; do curl -sf -O -L ${JAR_URL}; done \
+    && mv jmx_prometheus_javaagent-*.jar jmx_prometheus_javaagent.jar \
     && echo "Adding non-root user" \
     && useradd -l -u $USER_UID -r -g 0 -d $HZ_HOME -s /sbin/nologin -c "${USER_UID} application user" $USER_NAME \
     && chown -R $USER_UID:0 $HZ_HOME $HZ_CP_MOUNT \
