@@ -2,7 +2,7 @@ FROM registry.access.redhat.com/ubi8/ubi
 MAINTAINER Hazelcast, Inc. Integration Team <info@hazelcast.com>
 
 # Versions of Hazelcast and Hazelcast plugins
-ARG HZ_VERSION=4.1.1
+ARG HZ_VERSION=4.2-BETA-1
 ARG CACHE_API_VERSION=1.1.1
 ARG JMX_PROMETHEUS_AGENT_VERSION=0.11.0
 ARG NETTY_VERSION=4.1.47.Final
