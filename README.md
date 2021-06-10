@@ -1,3 +1,14 @@
+***
+> :warning: **REMARK:**
+>
+> This project was moved to https://github.com/hazelcast/hazelcast-docker/tree/master/hazelcast-enterprise.
+>
+> For the information on how to run Hazelcast on OpenShift, please check the following resources:
+> - [Hazelcast Docs: Kubernetes/OpenShift Deployment](https://docs.hazelcast.com/imdg/4.2/installation/deploying-in-kubernetes.html)
+> - [Hazelcast Guides: Hazelcast for OpenShift](https://guides.hazelcast.org/openshift/)
+> - [Hazelcast for Kubernetes](https://guides.hazelcast.org/kubernetes/) 
+***
+
 # Hazelcast OpenShift
 
 Hazelcast Enterprise is available on the OpenShift platform in a form of a dedicated Docker image [registry.connect.redhat.com/hazelcast/hazelcast-enterprise-4-rhel8`](https://catalog.redhat.com/software/containers/hazelcast/hazelcast-enterprise-4-rhel8/5ee38856ecb5246c090412bd) published in [Red Hat Container Catalog](https://access.redhat.com/containers/).
