@@ -1,12 +1,8 @@
 ***
 > :warning: **REMARK:**
 >
-> This project was moved to https://github.com/hazelcast/hazelcast-docker/tree/master/hazelcast-enterprise.
+> This project is deprecated, new project Hazelcast Platform Operator can be found [here](https://github.com/hazelcast/hazelcast-platform-operator).
 >
-> For the information on how to run Hazelcast on OpenShift, please check the following resources:
-> - [Hazelcast Docs: Kubernetes/OpenShift Deployment](https://docs.hazelcast.com/imdg/4.2/installation/deploying-in-kubernetes.html)
-> - [Hazelcast Guides: Hazelcast for OpenShift](https://guides.hazelcast.org/openshift/)
-> - [Hazelcast for Kubernetes](https://guides.hazelcast.org/kubernetes/) 
 ***
 
 # Hazelcast OpenShift
